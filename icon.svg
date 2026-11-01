@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#23407A"/>
+  <!-- the case -->
+  <rect x="76" y="70" width="360" height="380" rx="14" fill="#7C5D3D"/>
+  <rect x="96" y="90" width="320" height="340" rx="6" fill="#3B2B1C"/>
+  <!-- shelf boards -->
+  <rect x="96" y="246" width="320" height="18" fill="#A88259"/>
+  <rect x="76" y="430" width="360" height="20" rx="4" fill="#A88259"/>
+  <!-- top shelf books -->
+  <rect x="112" y="118" width="34" height="128" rx="3" fill="#D9A441"/>
+  <rect x="150" y="104" width="28" height="142" rx="3" fill="#B83A2E"/>
+  <rect x="182" y="126" width="40" height="120" rx="3" fill="#E6E8E3"/>
+  <rect x="226" y="110" width="30" height="136" rx="3" fill="#2F7D4F"/>
+  <rect x="260" y="122" width="26" height="124" rx="3" fill="#8FB0F0"/>
+  <g transform="rotate(14 330 246)"><rect x="300" y="128" width="32" height="118" rx="3" fill="#C86B3C"/></g>
+  <rect x="366" y="140" width="34" height="106" rx="3" fill="#5E665F"/>
+  <!-- bottom shelf: books and a game case -->
+  <rect x="112" y="290" width="26" height="140" rx="3" fill="#2F7D4F"/>
+  <rect x="142" y="300" width="36" height="130" rx="3" fill="#D9A441"/>
+  <rect x="182" y="284" width="30" height="146" rx="3" fill="#8FB0F0"/>
+  <rect x="216" y="306" width="22" height="124" rx="3" fill="#B83A2E"/>
+  <rect x="242" y="296" width="34" height="134" rx="3" fill="#E6E8E3"/>
+  <circle cx="352" cy="384" r="40" fill="#C9CDC5"/><circle cx="352" cy="384" r="12" fill="#3B2B1C"/>
+  <!-- spine bands -->
+  <g fill="#000" opacity=".18">
+    <rect x="112" y="140" width="34" height="6"/><rect x="182" y="150" width="40" height="6"/><rect x="226" y="134" width="30" height="6"/>
+    <rect x="142" y="322" width="36" height="6"/><rect x="242" y="320" width="34" height="6"/><rect x="182" y="306" width="30" height="6"/>
+  </g>
+</svg>

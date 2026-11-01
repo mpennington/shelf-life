@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shelf Life">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#E6E8E3">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Shelf Life</title>
+<style>
+  :root { color-scheme: light dark; --bg:#E6E8E3; --ink:#1B1F1C; --muted:#5E665F; --line:#C9CDC5; --accent:#23407A; --panel:#F4F5F1; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151816; --ink:#E6E9E3; --muted:#9AA39B; --line:#343A36; --accent:#8FB0F0; --panel:#1E2220; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px -apple-system, system-ui, sans-serif; padding:calc(24px + env(safe-area-inset-top)) 20px 24px; }
+  .wrap { max-width:460px; margin:0 auto; }
+  img.logo { width:72px; height:72px; border-radius:16px; display:block; margin:8px 0 14px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  p { color:var(--muted); line-height:1.45; margin:0 0 14px; }
+  textarea { width:100%; box-sizing:border-box; min-height:84px; font:15px ui-monospace, Menlo, monospace; padding:10px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); }
+  button { font:600 16px -apple-system, system-ui, sans-serif; padding:12px 16px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); margin:10px 8px 0 0; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  #err { color:#B83A2E; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img class="logo" src="icon-192.png" alt="">
+  <div id="setup" hidden>
+    <h1>Set up Shelf Life</h1>
+    <p>Paste your phone setup link. On your Mac, open Shelf Life and go to Settings, then Google Sheet backup, then <b>Copy phone setup link</b>, and send it to yourself.</p>
+    <textarea id="link" placeholder="https://…#u=…&amp;k=…" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <div><button id="paste" type="button">Paste</button><button id="go" class="primary" type="button">Open my library</button></div>
+    <p id="err"></p>
+  </div>
+  <p id="msg">Opening Shelf Life…</p>
+</div>
+<script>
+(function () {
+  var K = "shelf-phone-v1", $ = function (id) { return document.getElementById(id); };
+  var get = function (k) { try { return localStorage.getItem(K + ":" + k); } catch (e) { return null; } };
+  var put = function (k, v) { try { localStorage.setItem(K + ":" + k, v); return true; } catch (e) { return false; } };
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
+  function parse(s) {
+    var u = /[#&?]u=([\w-]{20,})/.exec(s || ""), k = /[#&?]k=(\w{16,})/.exec(s || "");
+    return u && k ? { u: u[1], k: k[1] } : null;
+  }
+  function msg(t) { $("msg").textContent = t; }
+  function api(c, sheet, off, lim) {
+    var url = "https://script.google.com/macros/s/" + c.u + "/exec?op=read&sheet=" + encodeURIComponent(sheet) + "&offset=" + off + "&limit=" + lim + "&token=" + encodeURIComponent(c.k);
+    return fetch(url).then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.error || "The Sheet said no"); return j; });
+  }
+  function fetchApp(c) {
+    var rows = [];
+    function more(off) { return api(c, "App", off, 50).then(function (j) { rows = rows.concat(j.rows); return rows.length < j.total && j.rows.length ? more(rows.length) : rows.join(""); }); }
+    return more(0);
+  }
+  function start(c, html) {
+    window.SHELF_API = { url: "https://script.google.com/macros/s/" + c.u + "/exec", key: c.k, cacheKey: K + ":app" };
+    document.open(); document.write(html); document.close();
+  }
+  function open(c) {
+    put("cfg", JSON.stringify(c));
+    var cached = get("app");
+    if (cached) return start(c, cached);
+    msg("Downloading Shelf Life from your Google Sheet…");
+    fetchApp(c).then(function (html) {
+      if (!html) throw new Error("Push from Shelf Life on your Mac first, then reopen this page.");
+      put("app", html); start(c, html);
+    }, function (e) { $("setup").hidden = false; msg(""); $("err").textContent = "Couldn't reach your Google Sheet: " + e.message; });
+  }
+  function setup() {
+    $("setup").hidden = false; msg("");
+    $("paste").onclick = function () { if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(function (t) { $("link").value = t; }, function () {}); };
+    $("go").onclick = function () { var c = parse($("link").value); if (!c) { $("err").textContent = "That doesn't look like a phone setup link."; return; } $("err").textContent = ""; open(c); };
+  }
+  var c = parse(location.hash);
+  if (!c) { try { c = JSON.parse(get("cfg") || "null"); } catch (e) { c = null; } }
+  if (c) open(c); else setup();
+})();
+</script>
+</body>
+</html>
