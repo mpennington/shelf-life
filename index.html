@@ -60,7 +60,9 @@
   }
   function start(c, html) {
     window.SHELF_API = { url: "https://script.google.com/macros/s/" + c.u + "/exec", key: c.k, cacheKey: K + ":app" };
-    document.open(); document.write(html); document.close();
+    /* Replace this page only once it has finished loading; before that, the browser would add the app below it instead. */
+    var go = function () { setTimeout(function () { document.open(); document.write(html); document.close(); }, 0); };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
   }
   function open(c) {
     put("cfg", JSON.stringify(c));
